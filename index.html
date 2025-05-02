@@ -13,8 +13,13 @@
 /*       border: 1px solid #ccc; */
 /*       background: #f9f9f9; */
     }
-    path {
+    .shape {
       fill: steelblue;
+      stroke: #333;
+      stroke-width: 1;
+    }
+    .lake {
+      fill: white;
       stroke: #333;
       stroke-width: 1;
     }
@@ -32,16 +37,19 @@
 <h1><button id="button" onclick="o_juta()">o juta e sike mi</button></h1>
 
 <svg viewBox="150 200 530 700">
-  <path id="morph-shape" />
+  <path class="shape" id="morph-shape" />
+  <path class="lake" id="morph-shape-lake" />
 </svg>
 </center>
 <script>
-  const pathEl = d3.select("#morph-shape");
+  const path = d3.select("#morph-shape");
+  const pathLake = d3.select("#morph-shape-lake");
 
   // From Wikipedia Commons:
   // https://commons.wikimedia.org/wiki/File:BlankMap-USA-Utah.svg
   // Salt Lake removed
-  const utahPath = "m 276.37871,812.57383 -48.8428,-0.5 0.1364,-16.91594 c 0.075,-9.30376 0.2866,-17.17876 0.4703,-17.5 0.2963,-0.51825 0.8004,-19.31765 2.2281,-83.08406 0.2278,-10.175 0.4391,-26.9375 0.4696,-37.25 0.0304,-10.3125 0.4188,-18.75 0.863,-18.75 0.4442,0 0.4575,-1.55247 0.0296,-3.44994 -0.428,-1.89746 -0.588,-3.64 -0.3557,-3.87231 0.2323,-0.23232 0.4344,-7.90484 0.4492,-17.05007 0.0148,-9.14522 0.3347,-16.62798 0.711,-16.62835 0.3763,-3.8e-4 0.6376,-7.08788 0.5806,-15.75 -0.0687,-10.43448 0.2688,-16.02811 1,-16.57545 0.7872,-0.58927 0.7434,-0.97215 -0.1526,-1.33541 -0.691,-0.2801 -1.0531,-0.838 -0.8048,-1.23976 1.1843,-1.91622 3.9546,-74.28148 6.7126,-175.34608 l 1.2211,-44.74736 104.7474,0.24736 104.7475,0.24737 0.3064,23.5 c 0.1686,12.925 0.2942,33.5125 0.2792,45.75 l -0.0272,22.25 18.037,-0.0969 c 9.9204,-0.0533 41.81801,-0.61579 70.88371,-1.25 35.1953,-0.76796 53.06189,-0.8191 53.49109,-0.15311 0.7867,1.22064 13.86781,375.3645 13.16291,376.48352 -0.2754,0.43723 -29.9757,1.11334 -66.0007,1.50247 -36.025,0.38914 -82.15001,0.91605 -102.50001,1.17091 -20.35,0.25486 -38.575,0.44623 -40.5,0.42525 -1.925,-0.021 -6.3112,-0.0754 -9.747,-0.12101 -3.4359,-0.0456 -6.5859,0.11314 -7,0.35271 -0.4142,0.23956 -3.1155,0.12263 -6.003,-0.25986 -2.8875,-0.38249 -5.25,-0.32611 -5.25,0.12529 0,0.4514 -1.575,0.82072 -3.5,0.82072 -2.1252,0 -3.506,-0.49101 -3.5153,-1.25 -0.0107,-0.87252 -0.2372,-0.91521 -0.75,-0.14135 -0.7988,1.20533 -4.4379,1.22197 -85.5776,0.39135 z";
+  const utahPath = "m276 813-48-1v-34c3-55 4-109 4-164l1-16v-16l1-17v-1l-1-1c1-2 4-75 7-176l1-44h210v92l18-1 125-1 13 377-66 1-265 2z";
+  const saltLakePath = "M365 465c2-3 5-5 6-5l1-1 1-2c2-1 2-2 1-3-2-1-2-3 0-2h5c3-1 4-2 6-6s2-5 1-5l-3-1h-3l-8-12-8-11-3-3v-7c2-3 2-4 1-6l-1-3c2-1 4 0 7 4 4 4 7 5 9 4 1-1-4-6-6-6l-2-2c-1-2-2-2-7-2s-5-1-5-3 0-2 5-1c5 0 6-1 3-2-3-2-10-1-11 1l1 6 2 10c1 7 0 11-5 11-4 1-4 1-5-3l-1-4-1-4c1-4 1-4-1-5-5-2-12-6-15-9-2-4-3-4-1-8l3-10 2-4-3 1-10 2c-6 1-8 1-8-1-2-2-4-2-4 1-1 1 0 8 1 14 2 10 2 13 1 15-2 3-1 12 1 13l6 1c3-1 4-1 6 4 3 6 3 10 1 13-1 2-1 3 1 5l5 4c2 1 3 2 3 7l-1 5c-2 1-1 3 2 6l6 3 11 2 10 3z";
 
   const circlePath = (() => {
     // Circle path (approximate using arc commands)
@@ -52,18 +60,30 @@
     return circlePath.toString();
   })();
 
+  const tinyCirclePath = (() => {
+    // Circle path (approximate using arc commands)
+    const circlePath = d3.path();
+    const cx = 340, cy = 420, r = 0;
+    circlePath.moveTo(cx + r, cy);
+    circlePath.arc(cx, cy, r, 0, 2 * Math.PI);
+    return circlePath.toString();
+  })();
+
+
   // Set initial shape (circle)
-  pathEl.attr("d", circlePath);
+  path.attr("d", circlePath);
+  pathLake.attr("d", tinyCirclePath);
 
   let button = document.getElementById("button");
 
   function o_juta() {
     button.onclick = () => {};
-    const interpolator = flubber.interpolate(circlePath, utahPath);
-    pathEl
-      .transition()
-      .duration(500)
-      .attrTween("d", () => t => interpolator(t));
+    let interpolator = flubber.interpolate(circlePath, utahPath);
+    let interpolatorLake = flubber.interpolate(tinyCirclePath, saltLakePath);
+    path.transition().duration(500)
+    .attrTween("d", () => t => interpolator(t));
+    pathLake.transition().duration(500)
+    .attrTween("d", () => t => interpolatorLake(t));
 
     setTimeout(() => {
       button.onclick = () => {o_sike()};
@@ -72,11 +92,12 @@
   }
   function o_sike() {
     button.onclick = () => {};
-    const interpolator = flubber.interpolate(utahPath, circlePath);
-    pathEl
-      .transition()
-      .duration(500)
-      .attrTween("d", () => t => interpolator(t));
+    let interpolator = flubber.interpolate(utahPath, circlePath);
+    let interpolatorLake = flubber.interpolate(saltLakePath, tinyCirclePath);
+    path.transition().duration(500)
+    .attrTween("d", () => t => interpolator(t));
+    pathLake.transition().duration(500)
+    .attrTween("d", () => t => interpolatorLake(t));
 
     setTimeout(() => {
       button.onclick = () => {o_juta()};
