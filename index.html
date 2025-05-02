@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>o juta e sike mi</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://unpkg.com/flubber"></script>
+  <style>
+    svg {
+      width: 400px;
+      height: 400px;
+      max-width: 100%;
+/*       border: 1px solid #ccc; */
+/*       background: #f9f9f9; */
+    }
+    path {
+      fill: steelblue;
+      stroke: #333;
+      stroke-width: 1;
+    }
+    h1 {
+        font-family: "Comic Sans MS", sans-serif;
+    }
+    button {
+        font-family: inherit;
+        font-size: inherit;
+    }
+  </style>
+</head>
+<body>
+<center>
+<h1><button id="button" onclick="o_juta()">o juta e sike mi</button></h1>
+
+<svg viewBox="150 200 530 700">
+  <path id="morph-shape" />
+</svg>
+</center>
+<script>
+  const pathEl = d3.select("#morph-shape");
+
+  // From Wikipedia Commons:
+  // https://commons.wikimedia.org/wiki/File:BlankMap-USA-Utah.svg
+  // Salt Lake removed
+  const utahPath = "m 276.37871,812.57383 -48.8428,-0.5 0.1364,-16.91594 c 0.075,-9.30376 0.2866,-17.17876 0.4703,-17.5 0.2963,-0.51825 0.8004,-19.31765 2.2281,-83.08406 0.2278,-10.175 0.4391,-26.9375 0.4696,-37.25 0.0304,-10.3125 0.4188,-18.75 0.863,-18.75 0.4442,0 0.4575,-1.55247 0.0296,-3.44994 -0.428,-1.89746 -0.588,-3.64 -0.3557,-3.87231 0.2323,-0.23232 0.4344,-7.90484 0.4492,-17.05007 0.0148,-9.14522 0.3347,-16.62798 0.711,-16.62835 0.3763,-3.8e-4 0.6376,-7.08788 0.5806,-15.75 -0.0687,-10.43448 0.2688,-16.02811 1,-16.57545 0.7872,-0.58927 0.7434,-0.97215 -0.1526,-1.33541 -0.691,-0.2801 -1.0531,-0.838 -0.8048,-1.23976 1.1843,-1.91622 3.9546,-74.28148 6.7126,-175.34608 l 1.2211,-44.74736 104.7474,0.24736 104.7475,0.24737 0.3064,23.5 c 0.1686,12.925 0.2942,33.5125 0.2792,45.75 l -0.0272,22.25 18.037,-0.0969 c 9.9204,-0.0533 41.81801,-0.61579 70.88371,-1.25 35.1953,-0.76796 53.06189,-0.8191 53.49109,-0.15311 0.7867,1.22064 13.86781,375.3645 13.16291,376.48352 -0.2754,0.43723 -29.9757,1.11334 -66.0007,1.50247 -36.025,0.38914 -82.15001,0.91605 -102.50001,1.17091 -20.35,0.25486 -38.575,0.44623 -40.5,0.42525 -1.925,-0.021 -6.3112,-0.0754 -9.747,-0.12101 -3.4359,-0.0456 -6.5859,0.11314 -7,0.35271 -0.4142,0.23956 -3.1155,0.12263 -6.003,-0.25986 -2.8875,-0.38249 -5.25,-0.32611 -5.25,0.12529 0,0.4514 -1.575,0.82072 -3.5,0.82072 -2.1252,0 -3.506,-0.49101 -3.5153,-1.25 -0.0107,-0.87252 -0.2372,-0.91521 -0.75,-0.14135 -0.7988,1.20533 -4.4379,1.22197 -85.5776,0.39135 z";
+
+  const circlePath = (() => {
+    // Circle path (approximate using arc commands)
+    const circlePath = d3.path();
+    const cx = 410, cy = 550, r = 250;
+    circlePath.moveTo(cx + r, cy);
+    circlePath.arc(cx, cy, r, 0, 2 * Math.PI);
+    return circlePath.toString();
+  })();
+
+  // Set initial shape (circle)
+  pathEl.attr("d", circlePath);
+
+  let button = document.getElementById("button");
+
+  function o_juta() {
+    button.onclick = () => {};
+    const interpolator = flubber.interpolate(circlePath, utahPath);
+    pathEl
+      .transition()
+      .duration(500)
+      .attrTween("d", () => t => interpolator(t));
+
+    setTimeout(() => {
+      button.onclick = () => {o_sike()};
+      button.innerHTML = "o sike e juta mi";
+    }, 400)
+  }
+  function o_sike() {
+    button.onclick = () => {};
+    const interpolator = flubber.interpolate(utahPath, circlePath);
+    pathEl
+      .transition()
+      .duration(500)
+      .attrTween("d", () => t => interpolator(t));
+
+    setTimeout(() => {
+      button.onclick = () => {o_juta()};
+      button.innerHTML = "o juta e sike mi";
+    }, 400)
+  }
+</script>
+
+</body>
+</html>
